@@ -1,4 +1,4 @@
-package breakingnews.dcarr.io.breakingnews;
+package breakingnews.dcarr.io;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -6,16 +6,12 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -32,28 +28,14 @@ import java.io.InputStreamReader;
 public class BreakingNewsActivity extends Activity {
 
     private String authToken = null;
+    private final String TAG = getClass().getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_breaking_news);
 
-
-        AccountManager mgr = AccountManager.get(this);
-        Account[] accts = mgr.getAccountsByType("com.google");
-        Account acct = accts[0];
-        AccountManagerFuture<Bundle> accountManagerFuture = mgr.getAuthToken(acct, Constants.SCOPE, null, this, null, null);
-        Bundle authTokenBundle = null;
-        try {
-            authTokenBundle = accountManagerFuture.getResult();
-        } catch (OperationCanceledException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (AuthenticatorException e) {
-            e.printStackTrace();
-        }
-        authToken = authTokenBundle.get(AccountManager.KEY_AUTHTOKEN).toString();
+        new AuthTask().execute();
 
         RelativeLayout cardOne = (RelativeLayout) findViewById(R.id.cardOne);
         TextView cardOneName = (TextView) cardOne.findViewById(R.id.list_widget_name);
@@ -123,29 +105,31 @@ public class BreakingNewsActivity extends Activity {
 
         json.put("notification", notification);
 
-        MirrorApiClient.getInstance(BreakingNewsActivity.this).createTimelineItem(authToken, json, new MirrorApiClient.Callback() {
-            @Override
-            public void onSuccess(HttpResponse response) {
-                Log.d("mirror", "success");
-            }
-
-            @Override
-            public void onFailure(HttpResponse response, Throwable e) {
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                    StringBuilder builder = new StringBuilder();
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line);
-                        builder.append("\n");
-                    }
-                    Log.e("mirror response", builder.toString());
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+        if (authToken != null) {
+            MirrorApiClient.getInstance(BreakingNewsActivity.this).createTimelineItem(authToken, json, new MirrorApiClient.Callback() {
+                @Override
+                public void onSuccess(HttpResponse response) {
+                    Log.d(TAG, "success");
                 }
-                Log.e("mirror", "error");
-            }
-        });
+
+                @Override
+                public void onFailure(HttpResponse response, Throwable e) {
+                    try {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                        StringBuilder builder = new StringBuilder();
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            builder.append(line);
+                            builder.append("\n");
+                        }
+                        Log.e("mirror response", builder.toString());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    Log.e("mirror", "error");
+                }
+            });
+        }
     }
 
 
@@ -166,5 +150,39 @@ public class BreakingNewsActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class AuthTask extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            AccountManager mgr = AccountManager.get(BreakingNewsActivity.this);
+            Account[] accts = mgr.getAccountsByType("com.google");
+            try {
+                final AccountManager manager = AccountManager.get(BreakingNewsActivity.this);
+                final Account account = accts[0];
+                Log.d(TAG, account.toString());
+                Bundle authResult = manager.getAuthToken(account, Constants.SCOPE, true, null, null).getResult();
+                String mAuthToken = authResult.getString(AccountManager.KEY_AUTHTOKEN);
+                return mAuthToken;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (AuthenticatorException e) {
+                e.printStackTrace();
+            } catch (OperationCanceledException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String token) {
+            if (token != null) {
+                authToken = token;
+                Log.d(TAG, authToken);
+            } else {
+                Log.d(TAG, "error getting token");
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-package breakingnews.dcarr.io.breakingnews;
+package breakingnews.dcarr.io;
 
 import org.json.JSONObject;
 
