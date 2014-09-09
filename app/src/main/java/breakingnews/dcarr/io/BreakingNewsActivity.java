@@ -54,9 +54,9 @@ public class BreakingNewsActivity extends Activity {
         });
 
         RelativeLayout cardTwo = (RelativeLayout) findViewById(R.id.cardTwo);
-        TextView cardTwoName = (TextView) cardOne.findViewById(R.id.list_widget_name);
+        TextView cardTwoName = (TextView) cardTwo.findViewById(R.id.list_widget_name);
         cardTwoName.setText("Home Depot Breach");
-        TextView cardTwoDesc = (TextView) cardOne.findViewById(R.id.list_widget_description);
+        TextView cardTwoDesc = (TextView) cardTwo.findViewById(R.id.list_widget_description);
         cardTwoDesc.setText("Home Depot confirms its payment systems were breached; no evidence PIN numbers compromised");
         cardTwo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,9 +70,9 @@ public class BreakingNewsActivity extends Activity {
         });
 
         RelativeLayout cardThree = (RelativeLayout) findViewById(R.id.cardThree);
-        TextView cardThreeName = (TextView) cardOne.findViewById(R.id.list_widget_name);
+        TextView cardThreeName = (TextView) cardThree.findViewById(R.id.list_widget_name);
         cardThreeName.setText("Penn Footabll");
-        TextView cardThreeDesc = (TextView) cardOne.findViewById(R.id.list_widget_description);
+        TextView cardThreeDesc = (TextView) cardThree.findViewById(R.id.list_widget_description);
         cardThreeDesc.setText("NCAA restores Penn State's eligibility for football bowl games, scholarships");
         cardThree.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,6 +97,39 @@ public class BreakingNewsActivity extends Activity {
         deleteMenu.put("action", "DELETE");
 
         menuItmes.put(deleteMenu);
+
+        JSONObject pocketMenu = new JSONObject();
+        pocketMenu.put("action", "CUSTOM");
+        pocketMenu.put("id", "pocket");
+        JSONObject pocketValues = new JSONObject();
+        pocketValues.put("displayName", "Save to Pocket");
+        pocketValues.put("iconUrl", "https://docs.google.com/a/scienceprousa.com/uc?id=0BysO7O2z9sluWmw5di12cnJya0k&export=download");
+        pocketMenu.put("values", pocketValues);
+
+        Log.d(TAG, pocketMenu.toString());
+        menuItmes.put(pocketMenu);
+
+        JSONObject reshareMenu = new JSONObject();
+        reshareMenu.put("action", "CUSTOM");
+        reshareMenu.put("id", "reshare");
+        JSONObject reshareValues = new JSONObject();
+        reshareValues.put("displayName", "Reshare");
+        reshareValues.put("iconUrl", "https://docs.google.com/a/scienceprousa.com/uc?id=0BysO7O2z9sluRFJRSll2SHk5bmc&export=download");
+        reshareMenu.put("values", reshareValues);
+
+        Log.d(TAG, reshareMenu.toString());
+        menuItmes.put(reshareMenu);
+
+        JSONObject openPhoneMenu = new JSONObject();
+        openPhoneMenu.put("action", "CUSTOM");
+        openPhoneMenu.put("id", "openPhone");
+        JSONObject openPhoneValues = new JSONObject();
+        openPhoneValues.put("displayName", "Open on Phone");
+        openPhoneValues.put("iconUrl", "https://docs.google.com/a/scienceprousa.com/uc?id=0BysO7O2z9sluQmY2MGFkUU9sU2c&export=download");
+        openPhoneMenu.put("values", openPhoneValues);
+
+        Log.d(TAG, openPhoneMenu.toString());
+        menuItmes.put(openPhoneMenu);
 
         json.put("menuItems", menuItmes);
 
